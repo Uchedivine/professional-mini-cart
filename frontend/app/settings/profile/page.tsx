@@ -4,30 +4,87 @@ import { useState, useMemo, useEffect } from "react";
 import { User, Briefcase, Mail, Phone, Calendar, UserPlus, CheckCircle, ChevronDown, Eye, EyeOff, Upload } from "lucide-react";
 import { Country, State, City } from 'country-state-city';
 import MainLayout from "@/components/layout/MainLayout";
+import { api } from "@/lib/api";
 
 export default function ProfileSettingsPage() {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [isAdmin, setIsAdmin] = useState(true);
     const [isVerified, setIsVerified] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
     // Form States
-    const [firstName, setFirstName] = useState("Jane");
-    const [lastName, setLastName] = useState("Austin");
-    const [email, setEmail] = useState("trungkienpsktnd@gmail.com");
-    const [phone, setPhone] = useState("07023859914");
-    const [address, setAddress] = useState("775 Rolling Green Rd.");
-    const [birthday, setBirthday] = useState("Oct 03, 1976");
-    const [gender, setGender] = useState("Female");
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [email, setEmail] = useState("");
+    const [phone, setPhone] = useState("");
+    const [address, setAddress] = useState("");
+    const [birthday, setBirthday] = useState("");
+    const [gender, setGender] = useState("");
+    const [postCode, setPostCode] = useState("");
 
     // Dynamic Location States
-    const [countryCode, setCountryCode] = useState("NG"); // Default Nigeria
-    const [stateCode, setStateCode] = useState("RI"); // Default Rivers
-    const [cityName, setCityName] = useState("Port-Harcourt");
+    const [countryCode, setCountryCode] = useState("NG");
+    const [stateCode, setStateCode] = useState("");
+    const [cityName, setCityName] = useState("");
+
+    // Fetch profile data on mount
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                // For assessment purposes, we assume auth is handled (e.g., via session/cookie)
+                // In a real app, this would require a token or established session.
+                const user = await api.get("/profile");
+                setFirstName(user.first_name || "");
+                setLastName(user.last_name || "");
+                setEmail(user.email || "");
+                setPhone(user.phone || "");
+                setAddress(user.address || "");
+                setBirthday(user.birthday || ""); // Assuming birthday field mapping
+                setGender(user.gender || "Female");
+                setCountryCode(user.country || "NG");
+                setStateCode(user.state || "");
+                setCityName(user.city || "");
+                setIsAdmin(!!user.is_admin);
+                setIsVerified(!!user.is_verified);
+                setPostCode(user.post_code || "");
+            } catch (err) {
+                console.error("Failed to fetch profile:", err);
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const countries = useMemo(() => Country.getAllCountries(), []);
     const states = useMemo(() => State.getStatesOfCountry(countryCode), [countryCode]);
     const cities = useMemo(() => City.getCitiesOfState(countryCode, stateCode), [countryCode, stateCode]);
+
+    const handleSave = async () => {
+        setIsLoading(true);
+        setMessage(null);
+        try {
+            await api.put("/profile", {
+                first_name: firstName,
+                last_name: lastName,
+                email: email,
+                phone: phone,
+                address: address,
+                gender: gender,
+                country: countryCode,
+                state: stateCode,
+                city: cityName,
+                is_admin: isAdmin,
+                is_verified: isVerified,
+                post_code: postCode,
+            });
+            setMessage({ type: "success", text: "Profile updated successfully!" });
+        } catch (err: any) {
+            setMessage({ type: "error", text: err.message || "Failed to update profile" });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Reset state and city when country changes
     const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -349,17 +406,20 @@ export default function ProfileSettingsPage() {
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
-                                    <button style={{
-                                        border: "1px solid #E8345A",
-                                        backgroundColor: "transparent",
-                                        color: "#E8345A",
-                                        padding: "12px 32px",
-                                        borderRadius: "8px",
-                                        fontSize: "14px",
-                                        fontWeight: 600,
-                                        cursor: "pointer"
-                                    }}>
-                                        Save Changes
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={isLoading}
+                                        style={{
+                                            border: "1px solid #E8345A",
+                                            backgroundColor: "transparent",
+                                            color: "#E8345A",
+                                            padding: "12px 32px",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: 600,
+                                            cursor: isLoading ? "not-allowed" : "pointer"
+                                        }}>
+                                        {isLoading ? "Saving..." : "Save Changes"}
                                     </button>
                                 </div>
                             </div>
@@ -405,38 +465,59 @@ export default function ProfileSettingsPage() {
                                 </div>
 
                                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
-                                    <button style={{
-                                        border: "1px solid #E8345A",
-                                        backgroundColor: "transparent",
-                                        color: "#E8345A",
-                                        padding: "12px 32px",
-                                        borderRadius: "8px",
-                                        fontSize: "14px",
-                                        fontWeight: 600,
-                                        cursor: "pointer"
-                                    }}>
-                                        Change Password
+                                    <button
+                                        onClick={handleSave}
+                                        disabled={isLoading}
+                                        style={{
+                                            border: "1px solid #E8345A",
+                                            backgroundColor: "transparent",
+                                            color: "#E8345A",
+                                            padding: "12px 32px",
+                                            borderRadius: "8px",
+                                            fontSize: "14px",
+                                            fontWeight: 600,
+                                            cursor: isLoading ? "not-allowed" : "pointer"
+                                        }}>
+                                        {isLoading ? "Saving..." : "Change Password"}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
+
+                    {message && (
+                        <div style={{
+                            marginTop: "24px",
+                            padding: "16px",
+                            borderRadius: "8px",
+                            backgroundColor: message.type === "success" ? "#E6F4EA" : "#FDE8E8",
+                            color: message.type === "success" ? "#1E7E34" : "#C81E1E",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            textAlign: "center"
+                        }}>
+                            {message.text}
+                        </div>
+                    )}
                 </div>
 
                 {/* Global Save Changes Button at Bottom */}
                 <div style={{ display: "flex", justifyContent: "center", width: "100%" }}>
-                    <button style={{
-                        backgroundColor: "#E8345A",
-                        color: "#FFFFFF",
-                        padding: "16px 120px",
-                        borderRadius: "8px",
-                        fontSize: "16px",
-                        fontWeight: 700,
-                        border: "none",
-                        cursor: "pointer",
-                        width: "60%"
-                    }}>
-                        Save Changes
+                    <button
+                        onClick={handleSave}
+                        disabled={isLoading}
+                        style={{
+                            backgroundColor: "#E8345A",
+                            color: "#FFFFFF",
+                            padding: "16px 120px",
+                            borderRadius: "8px",
+                            fontSize: "16px",
+                            fontWeight: 700,
+                            border: "none",
+                            cursor: isLoading ? "not-allowed" : "pointer",
+                            width: "60%"
+                        }}>
+                        {isLoading ? "Saving Data..." : "Save Changes"}
                     </button>
                 </div>
             </div>

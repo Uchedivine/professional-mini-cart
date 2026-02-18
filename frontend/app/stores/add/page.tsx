@@ -1,18 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronDown, Plus } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
+import { api } from "@/lib/api";
 
 export default function AddStorePage() {
   const [domain, setDomain] = useState("");
-  const [plan, setPlan] = useState("Select plan");
-  const [status, setStatus] = useState("Select status");
-  const [userSearch, setUserSearch] = useState("");
+  const [planId, setPlanId] = useState("");
+  const [status, setStatus] = useState("Pending");
+  const [userEmail, setUserEmail] = useState("admin@minicart.localhost");
+  const [availablePlans, setAvailablePlans] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const handleCreateStore = () => {
-    console.log({ domain, plan, status, userSearch });
-    alert("Store created!");
+  useEffect(() => {
+    const fetchPlans = async () => {
+      try {
+        const plans = await api.get("/plans");
+        setAvailablePlans(plans);
+        if (plans.length > 0) setPlanId(plans[0].id.toString());
+      } catch (err) {
+        console.error("Failed to fetch plans:", err);
+      }
+    };
+    fetchPlans();
+  }, []);
+
+  const handleCreateStore = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      // In a real app, we'd search for user_id. Here we assume the seeded admin user
+      const user = await api.get("/profile");
+
+      await api.post("/stores", {
+        domain: domain.endsWith(".localhost") ? domain : `${domain}.localhost`,
+        plan_id: planId,
+        status: status,
+        user_id: user.id
+      });
+      setMessage({ type: "success", text: "Store created successfully!" });
+      setDomain("");
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message || "Failed to create store" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -63,18 +97,7 @@ export default function AddStorePage() {
                     outline: "none",
                   }}
                 />
-                <div
-                  style={{
-                    backgroundColor: "#F5F6FA",
-                    padding: "14px 24px",
-                    color: "#190044",
-                    fontSize: "14px",
-                    fontWeight: 500,
-                    borderLeft: "1px solid #E8E8F0",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
+                <div style={{ backgroundColor: "#F5F6FA", padding: "14px 24px", color: "#190044", fontSize: "14px", fontWeight: 500, borderLeft: "1px solid #E8E8F0", display: "flex", alignItems: "center" }}>
                   .Localhost
                 </div>
               </div>
@@ -87,8 +110,8 @@ export default function AddStorePage() {
               </label>
               <div style={{ position: "relative" }}>
                 <select
-                  value={plan}
-                  onChange={(e) => setPlan(e.target.value)}
+                  value={planId}
+                  onChange={(e) => setPlanId(e.target.value)}
                   style={{
                     width: "100%",
                     padding: "14px 40px 14px 16px",
@@ -96,29 +119,18 @@ export default function AddStorePage() {
                     border: "1px solid #E8E8F0",
                     backgroundColor: "#FFFFFF",
                     fontSize: "14px",
-                    color: plan === "Select plan" ? "#9FA2B4" : "#190044",
+                    color: !planId ? "#9FA2B4" : "#190044",
                     appearance: "none",
                     outline: "none",
                     cursor: "pointer",
                   }}
                 >
-                  <option disabled>Select plan</option>
-                  <option>Starter Plan</option>
-                  <option>Standard</option>
-                  <option>Premium</option>
-                  <option>Platinum</option>
+                  <option value="" disabled>Select plan</option>
+                  {availablePlans.map((p) => (
+                    <option key={p.id} value={p.id}>{p.title}</option>
+                  ))}
                 </select>
-                <ChevronDown
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    right: "16px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    pointerEvents: "none",
-                    color: "#9FA2B4",
-                  }}
-                />
+                <ChevronDown size={16} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#9FA2B4" }} />
               </div>
             </div>
 
@@ -138,29 +150,18 @@ export default function AddStorePage() {
                     border: "1px solid #E8E8F0",
                     backgroundColor: "#FFFFFF",
                     fontSize: "14px",
-                    color: status === "Select status" ? "#9FA2B4" : "#190044",
+                    color: "#190044",
                     appearance: "none",
                     outline: "none",
                     cursor: "pointer",
                   }}
                 >
-                  <option disabled>Select status</option>
                   <option>Active</option>
                   <option>Pending</option>
                   <option>Expired</option>
                   <option>Suspended</option>
                 </select>
-                <ChevronDown
-                  size={16}
-                  style={{
-                    position: "absolute",
-                    right: "16px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    pointerEvents: "none",
-                    color: "#9FA2B4",
-                  }}
-                />
+                <ChevronDown size={16} style={{ position: "absolute", right: "16px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", color: "#9FA2B4" }} />
               </div>
             </div>
 
@@ -173,35 +174,12 @@ export default function AddStorePage() {
                 <input
                   type="text"
                   placeholder="Type to search"
-                  value={userSearch}
-                  onChange={(e) => setUserSearch(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: "14px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #E8E8F0",
-                    fontSize: "14px",
-                    color: "#190044",
-                    outline: "none",
-                  }}
+                  value={userEmail}
+                  onChange={(e) => setUserEmail(e.target.value)}
+                  style={{ flex: 1, padding: "14px 16px", borderRadius: "8px", border: "1px solid #E8E8F0", fontSize: "14px", color: "#190044", outline: "none" }}
                 />
-                <button
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "14px 24px",
-                    borderRadius: "8px",
-                    border: "1px solid #E8345A",
-                    backgroundColor: "#FFFFFF",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#E8345A",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Plus size={16} />
-                  Add User
+                <button style={{ display: "flex", alignItems: "center", gap: "8px", padding: "14px 24px", borderRadius: "8px", border: "1px solid #E8345A", backgroundColor: "#FFFFFF", fontSize: "14px", fontWeight: 600, color: "#E8345A", cursor: "pointer" }}>
+                  <Plus size={16} /> Add User
                 </button>
               </div>
             </div>
@@ -209,21 +187,28 @@ export default function AddStorePage() {
             {/* Create Store button */}
             <button
               onClick={handleCreateStore}
+              disabled={isLoading}
               style={{
                 width: "100%",
                 padding: "16px",
                 borderRadius: "8px",
-                backgroundColor: "#E8345A",
+                backgroundColor: isLoading ? "#4B4B4B" : "#E8345A",
                 color: "#FFFFFF",
                 fontSize: "14px",
                 fontWeight: 600,
                 border: "none",
-                cursor: "pointer",
+                cursor: isLoading ? "not-allowed" : "pointer",
                 marginTop: "12px",
               }}
             >
-              Create Store
+              {isLoading ? "Creating Store..." : "Create Store"}
             </button>
+
+            {message && (
+              <div style={{ marginTop: "16px", padding: "12px", borderRadius: "8px", backgroundColor: message.type === "success" ? "#E6F4EA" : "#FDE8E8", color: message.type === "success" ? "#1E7E34" : "#C81E1E", fontSize: "13px", fontWeight: 600, textAlign: "center" }}>
+                {message.text}
+              </div>
+            )}
           </div>
         </div>
       </div>

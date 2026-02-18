@@ -1,27 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ChevronDown, MoreVertical, Plus } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
-
-const ALL_STORES = [
-  { id: 1, name: "Luisa Via Roma", avatar: "🟠", user: "Ralph Edwards", email: "debbie.baker@example.com", initials: "RE", initialsColor: "#E8D5F2", plan: "Starter Plan", domain: "Example.Localhost", status: "Active" },
-  { id: 2, name: "Revolve", avatar: "🟡", user: "Arlene McCoy", email: "debra.holt@example.com", initials: "AM", initialsColor: "#FFD5D5", plan: "Standard", domain: "Example.Localhost", status: "Pending" },
-  { id: 3, name: "Marks and Spencer", avatar: "🟢", user: "Darlene Robertson", email: "kenzi.lawson@example.com", initials: "DR", initialsColor: "#D5F5E3", plan: "Premium", domain: "Example.Localhost", status: "Expired" },
-  { id: 4, name: "MyTheresa", avatar: "🟠", user: "Annette Black", email: "tim.jennings@example.com", initials: "AB", initialsColor: "#FFE5CC", plan: "Platinum", domain: "Example.Localhost", status: "Suspended" },
-  { id: 5, name: "Coggles", avatar: "🟣", user: "Cody Fisher", email: "deanna.curtis@example.com", initials: "CF", initialsColor: "#FFF9CC", plan: "Gold", domain: "Example.Localhost", status: "Active" },
-  { id: 6, name: "Amazon Fashion", avatar: "🔵", user: "Jane Cooper", email: "tanya.hill@example.com", initials: "JC", initialsColor: "#FFD5E5", plan: "Pro", domain: "Example.Localhost", status: "Active" },
-  { id: 7, name: "Boohoo", avatar: "🟠", user: "Leslie Alexander", email: "michael.mitc@example.com", initials: "LA", initialsColor: "#E8D5F2", plan: "Starter Premium", domain: "Example.Localhost", status: "Active" },
-  { id: 8, name: "Rag and Bone", avatar: "🟡", user: "Marvin McKinney", email: "bill.sanders@example.com", initials: "MM", initialsColor: "#FFD5D5", plan: "Starter Platinum", domain: "Example.Localhost", status: "Active" },
-  { id: 9, name: "Luisa Via Roma", avatar: "🟠", user: "Ralph Edwards", email: "debbie.baker@example.com", initials: "RE", initialsColor: "#E8D5F2", plan: "Starter Plan", domain: "Example.Localhost", status: "Active" },
-  { id: 10, name: "Revolve", avatar: "🟡", user: "Arlene McCoy", email: "debra.holt@example.com", initials: "AM", initialsColor: "#FFD5D5", plan: "Standard", domain: "Example.Localhost", status: "Pending" },
-  { id: 11, name: "Marks and Spencer", avatar: "🟢", user: "Darlene Robertson", email: "kenzi.lawson@example.com", initials: "DR", initialsColor: "#D5F5E3", plan: "Premium", domain: "Example.Localhost", status: "Expired" },
-  { id: 12, name: "MyTheresa", avatar: "🟠", user: "Annette Black", email: "tim.jennings@example.com", initials: "AB", initialsColor: "#FFE5CC", plan: "Platinum", domain: "Example.Localhost", status: "Suspended" },
-  { id: 13, name: "Coggles", avatar: "🟣", user: "Cody Fisher", email: "deanna.curtis@example.com", initials: "CF", initialsColor: "#FFF9CC", plan: "Gold", domain: "Example.Localhost", status: "Active" },
-  { id: 14, name: "Amazon Fashion", avatar: "🔵", user: "Jane Cooper", email: "tanya.hill@example.com", initials: "JC", initialsColor: "#FFD5E5", plan: "Pro", domain: "Example.Localhost", status: "Active" },
-  { id: 15, name: "Boohoo", avatar: "🟠", user: "Leslie Alexander", email: "michael.mitc@example.com", initials: "LA", initialsColor: "#E8D5F2", plan: "Starter Premium", domain: "Example.Localhost", status: "Active" },
-  { id: 16, name: "Rag and Bone", avatar: "🟡", user: "Marvin McKinney", email: "bill.sanders@example.com", initials: "MM", initialsColor: "#FFD5D5", plan: "Starter Platinum", domain: "Example.Localhost", status: "Active" },
-];
+import { api } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   Active: { bg: "#E6F4EA", color: "#1E7E34" },
@@ -31,13 +13,42 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 };
 
 export default function ManageStorePage() {
+  const [stores, setStores] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All Status");
   const [entries, setEntries] = useState(8);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filtered = ALL_STORES.filter((s) => {
+  useEffect(() => {
+    const fetchStores = async () => {
+      setIsLoading(true);
+      try {
+        const data = await api.get("/stores");
+        const formatted = data.map((s: any) => ({
+          id: s.id,
+          name: s.domain.split('.')[0].charAt(0).toUpperCase() + s.domain.split('.')[0].slice(1),
+          avatar: "🔴", // Placeholder
+          user: `${s.user?.first_name || ''} ${s.user?.last_name || ''}`.trim() || s.user?.name || 'Unknown',
+          email: s.user?.email || 'No email',
+          initials: (s.user?.first_name?.[0] || 'U') + (s.user?.last_name?.[0] || ''),
+          initialsColor: "#E8D5F2",
+          plan: s.plan?.title || 'No Plan',
+          domain: s.domain,
+          status: s.status
+        }));
+        setStores(formatted);
+      } catch (err) {
+        console.error("Failed to fetch stores:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchStores();
+  }, []);
+
+  const filtered = stores.filter((s) => {
     const matchSearch =
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       s.user.toLowerCase().includes(search.toLowerCase()) ||

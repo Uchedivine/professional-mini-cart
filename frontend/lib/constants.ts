@@ -9,11 +9,33 @@ export const COLORS = {
   border: "#E8E8F0",
 };
 
-export const NAV_ITEMS = [
+interface NavChild {
+  label: string;
+  href: string;
+}
+
+interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+  hasChildren?: boolean;
+  children?: NavChild[];
+}
+
+export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
   { label: "Revenue", href: "/revenue", icon: "DollarSign" },
   { label: "Locations", href: "/locations", icon: "MapPin" },
-  { label: "Plans", href: "/plans", icon: "ClipboardList", hasChildren: true },
+  { 
+    label: "Plans", 
+    href: "/plans", 
+    icon: "ClipboardList", 
+    hasChildren: true,
+    children: [
+      { label: "Add Plan", href: "/plans/add" },
+      { label: "Manage Plan", href: "/plans/manage" },
+    ]
+  },
   { label: "Stores", href: "/stores", icon: "Store", hasChildren: true },
   { label: "Pages", href: "/pages", icon: "FileText", hasChildren: true },
   { label: "Media", href: "/media", icon: "Image" },

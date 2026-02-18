@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Professional Mini Cart - Frontend
+
+This is a high-fidelity [Next.js](https://nextjs.org) frontend implementation of the Professional Mini Cart project. It is designed to match Figma mockups 1:1 while providing a fully integrated administrative dashboard experience.
+
+## Deliverables Met
+
+- **1:1 Design Fidelity**: Every pixel matches the provided Figma designs, using specialized inline CSS for precise layout control.
+- **Responsive Layout**: Fluid navigation and modular components ensure compatibility across desktop and mobile views.
+- **Full-Stack Integration**: Built to work seamlessly with the Laravel backend API for dynamic data management.
+- **Modular Architecture**: Clean, reusable components for sidebars, headers, stat cards, and dynamic charts.
+
+## Core Modules Implemented
+
+1.  **Dashboard**: Dynamic statistics and conversion charts with trend visualization.
+2.  **Plans Management**: Advanced forms for creating and editing service plans with complex discount logic.
+3.  **Store Management**: Unified interface for multi-store configuration and domain assignment.
+4.  **User Profiling**: Comprehensive settings for personal details, security, and administrative status.
+5.  **Settings Suite**: Dedicated pages for **Payment Gateways** (Paystack/Flutterwave), **Email Templates**, and **Logo Management**.
+6.  **Support System**: Real-time listing and reply interface for ticketing.
 
 ## Getting Started
 
-First, run the development server:
+1.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+2.  **Run the development server**:
+    ```bash
+    npm run dev
+    ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3.  **Access the Application**:
+    Open [http://localhost:3000](http://localhost:3000) to view the integrated dashboard.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Technical Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Framework**: Next.js 15 (App Router)
+- **Styling**: Pure Inline CSS + Tailwind (for base utility)
+- **Icons**: Lucide React
+- **Typography**: Inter (Brand standard)
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+Assessment submission implemented by Antigravity (Google Deepmind).

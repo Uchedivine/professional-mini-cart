@@ -26,30 +26,30 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard" },
   { label: "Revenue", href: "/revenue", icon: "DollarSign" },
   { label: "Locations", href: "/locations", icon: "MapPin" },
-  { 
-    label: "Plans", 
-    href: "/plans", 
-    icon: "ClipboardList", 
+  {
+    label: "Plans",
+    href: "/plans",
+    icon: "ClipboardList",
     hasChildren: true,
     children: [
       { label: "Add Plan", href: "/plans/add" },
       { label: "Manage Plan", href: "/plans/manage" },
     ]
   },
-  { 
-    label: "Stores", 
-    href: "/stores", 
-    icon: "Store", 
+  {
+    label: "Stores",
+    href: "/stores",
+    icon: "Store",
     hasChildren: true,
     children: [
       { label: "Add Store", href: "/stores/add" },
       { label: "Manage Store", href: "/stores/manage" },
     ]
   },
-  { 
-    label: "Pages", 
-    href: "/pages", 
-    icon: "FileText", 
+  {
+    label: "Pages",
+    href: "/pages",
+    icon: "FileText",
     hasChildren: true,
     children: [
       { label: "Add Page", href: "/pages/add" },
@@ -58,18 +58,16 @@ export const NAV_ITEMS: NavItem[] = [
   },
   { label: "Media", href: "/media", icon: "Image" },
   { label: "Users", href: "/users", icon: "Users" },
-  { label: "Support", href: "/support", icon: "HeadphonesIcon", hasChildren: true },
-
-  { 
-  label: "Support", 
-  href: "/support", 
-  icon: "HeadphonesIcon", 
-  hasChildren: true,
-  children: [
-    { label: "Support List", href: "/support/list" },
-    { label: "Support Reply", href: "/support/reply" },
-  ]
-},
+  {
+    label: "Support",
+    href: "/support",
+    icon: "HeadphonesIcon",
+    hasChildren: true,
+    children: [
+      { label: "Support List", href: "/support/list" },
+      { label: "Support Reply", href: "/support/reply" },
+    ]
+  },
 ];
 
 export const SYSTEM_ITEMS = [

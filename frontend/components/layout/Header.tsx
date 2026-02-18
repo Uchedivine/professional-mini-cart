@@ -2,12 +2,29 @@
 
 import { Search, Moon, Bell, Menu, ChevronDown } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 export default function Header({ onMenuClick }: HeaderProps) {
+  const [userName, setUserName] = useState("Jane Austin");
+  const [userAvatar, setUserAvatar] = useState("https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const user = await api.get("/profile");
+        setUserName(`${user.first_name || ''} ${user.last_name || ''}`.trim() || user.name);
+        setUserAvatar(user.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`);
+      } catch (err) {
+        console.error("Failed to fetch user for header:", err);
+      }
+    };
+    fetchUser();
+  }, []);
   return (
     <header
       className="h-16 flex items-center justify-between px-6 border-b"
@@ -64,17 +81,23 @@ export default function Header({ onMenuClick }: HeaderProps) {
         {/* User */}
         <div className="flex items-center gap-3 cursor-pointer pl-4">
           <div className="w-10 h-10 rounded-full overflow-hidden border border-[#F3F4F6]">
-            <img
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=256&q=80"
-              alt="Jane Austin"
-              className="w-full h-full object-cover"
-            />
+            {userAvatar ? (
+              <img
+                src={userAvatar}
+                alt={userName}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
+                {userName.charAt(0)}
+              </div>
+            )}
           </div>
           <div className="hidden sm:flex items-center gap-2">
             <p
               className="text-sm font-bold text-[#111827]"
             >
-              Jane Austin
+              {userName}
             </p>
             <ChevronDown size={16} className="text-[#6B7280]" />
           </div>

@@ -1,19 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, ChevronDown, MoreVertical, Plus } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
-
-const USERS_DATA = [
-    { id: 1, userId: "95214362", name: "Ralph Edwards", email: "debbie.bakker@example.com", type: "Admin", createdAt: "21 Sep, 2025", status: "Active", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ralph" },
-    { id: 2, userId: "51746385", name: "Arlene McCoy", email: "debra.holt@example.com", type: "User", createdAt: "21 Sep, 2025", status: "Inactive", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Arlene" },
-    { id: 3, userId: "673971743", name: "Darlene Robertson", email: "kenzi.lawson@example.com", type: "Admin", createdAt: "21 Sep, 2025", status: "Suspended", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Darlene" },
-    { id: 4, userId: "71667167", name: "Annette Black", email: "tim.jennings@example.com", type: "Admin", createdAt: "21 Sep, 2025", status: "Banned", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Annette" },
-    { id: 5, userId: "96459761", name: "Cody Fisher", email: "deanna.curtis@example.com", type: "Admin", createdAt: "21 Sep, 2025", status: "Active", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Cody" },
-    { id: 6, userId: "96459761", name: "Jane Cooper", email: "tanya.hill@example.com", type: "User", createdAt: "21 Sep, 2025", status: "Active", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Jane" },
-    { id: 7, userId: "96459761", name: "Leslie Alexander", email: "michael.mitc@example.com", type: "User", createdAt: "21 Sep, 2025", status: "Active", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Leslie" },
-    { id: 8, userId: "673971743", name: "Marvin McKinney", email: "bill.sanders@example.com", type: "Admin", createdAt: "21 Sep, 2025", status: "Active", avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marvin" },
-];
+import { api } from "@/lib/api";
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
     Active: { bg: "#E6F4EA", color: "#1E7E34" },
@@ -23,14 +13,42 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 };
 
 export default function UsersPage() {
+    const [users, setUsers] = useState<any[]>([]);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("All Status");
     const [type, setType] = useState("All Types");
     const [entries, setEntries] = useState(8);
     const [page, setPage] = useState(1);
     const [selected, setSelected] = useState<number[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const filtered = USERS_DATA.filter((u) => {
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setIsLoading(true);
+            try {
+                const data = await api.get("/users");
+                // Transform data to match UI expectations if needed
+                const formattedUsers = data.map((u: any) => ({
+                    id: u.id,
+                    userId: u.id.toString().padStart(8, '0'),
+                    name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.name,
+                    email: u.email,
+                    type: u.is_admin ? "Admin" : "User",
+                    createdAt: new Date(u.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+                    status: u.is_verified ? "Active" : "Inactive",
+                    avatar: u.profile_picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${u.name}`
+                }));
+                setUsers(formattedUsers);
+            } catch (err) {
+                console.error("Failed to fetch users:", err);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    const filtered = users.filter((u) => {
         const matchSearch =
             u.name.toLowerCase().includes(search.toLowerCase()) ||
             u.userId.includes(search) ||

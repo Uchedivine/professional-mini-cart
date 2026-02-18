@@ -3,11 +3,12 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import MainLayout from "@/components/layout/MainLayout";
+import { api } from "@/lib/api";
 
 function Toggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
   return (
     <button
-      onClick={onToggle}
+      onClick={(e) => { e.preventDefault(); onToggle(); }}
       aria-label="Toggle status"
       style={{
         position: "relative",
@@ -43,9 +44,9 @@ function Toggle({ active, onToggle }: { active: boolean; onToggle: () => void })
 export default function AddPlanPage() {
   const [title, setTitle] = useState("");
   const [price, setPrice] = useState("");
-  const [status, setStatus] = useState("Select status");
+  const [status, setStatus] = useState("Active");
   const [description, setDescription] = useState("");
-  const [publishStatus, setPublishStatus] = useState("Inactive");
+  const [publishStatus, setPublishStatus] = useState("Active");
   const [discountEnabled, setDiscountEnabled] = useState(false);
   const [applyMonthly, setApplyMonthly] = useState(false);
   const [applyYearly, setApplyYearly] = useState(false);
@@ -53,21 +54,36 @@ export default function AddPlanPage() {
   const [discountAmount, setDiscountAmount] = useState("");
   const [discountType, setDiscountType] = useState("Percentage");
 
-  const handleCreatePlan = () => {
-    console.log({
-      title,
-      price,
-      status,
-      description,
-      publishStatus,
-      discountEnabled,
-      applyMonthly,
-      applyYearly,
-      applyQuarterly,
-      discountAmount,
-      discountType,
-    });
-    alert("Plan created!");
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const handleCreatePlan = async () => {
+    setIsLoading(true);
+    setMessage(null);
+    try {
+      await api.post("/plans", {
+        title,
+        price: parseFloat(price) || 0,
+        status,
+        description,
+        publish_status: publishStatus,
+        discount_enabled: discountEnabled,
+        apply_monthly: applyMonthly,
+        apply_yearly: applyYearly,
+        apply_quarterly: applyQuarterly,
+        discount_amount: parseFloat(discountAmount) || 0,
+        discount_type: discountType,
+      });
+      setMessage({ type: "success", text: "Plan created successfully!" });
+      // Reset form
+      setTitle("");
+      setPrice("");
+      setDescription("");
+    } catch (err: any) {
+      setMessage({ type: "error", text: err.message || "Failed to create plan" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -212,21 +228,37 @@ export default function AddPlanPage() {
               {/* Create Plan button */}
               <button
                 onClick={handleCreatePlan}
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "14px",
                   borderRadius: "8px",
-                  backgroundColor: "#190044",
+                  backgroundColor: isLoading ? "#4B4B4B" : "#190044",
                   color: "#FFFFFF",
                   fontSize: "14px",
                   fontWeight: 600,
                   border: "none",
-                  cursor: "pointer",
+                  cursor: isLoading ? "not-allowed" : "pointer",
                   marginTop: "8px"
                 }}
               >
-                Create Plan
+                {isLoading ? "Creating..." : "Create Plan"}
               </button>
+
+              {message && (
+                <div style={{
+                  marginTop: "16px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  backgroundColor: message.type === "success" ? "#E6F4EA" : "#FDE8E8",
+                  color: message.type === "success" ? "#1E7E34" : "#C81E1E",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  textAlign: "center"
+                }}>
+                  {message.text}
+                </div>
+              )}
             </div>
           </div>
 
@@ -279,20 +311,22 @@ export default function AddPlanPage() {
                 />
               </div>
               <button
+                onClick={handleCreatePlan}
+                disabled={isLoading}
                 style={{
                   width: "100%",
                   padding: "14px",
                   borderRadius: "8px",
-                  backgroundColor: "#190044",
+                  backgroundColor: isLoading ? "#4B4B4B" : "#190044",
                   color: "#FFFFFF",
                   fontSize: "14px",
                   fontWeight: 600,
                   border: "none",
-                  cursor: "pointer",
+                  cursor: isLoading ? "not-allowed" : "pointer",
                   marginTop: "16px"
                 }}
               >
-                Publish
+                {isLoading ? "Publishing..." : "Publish"}
               </button>
             </div>
 

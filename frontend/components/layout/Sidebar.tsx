@@ -59,17 +59,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     backgroundColor: "#190044",
     color: "#FFFFFF",
     borderRadius: "10px",
-    padding: "16px 24px", // Increased horizontal padding for more space
+    padding: "16px 24px",
   };
 
   const inactiveStyle = {
     backgroundColor: "transparent",
     color: "#190044",
     borderRadius: "10px",
-    padding: "16px 24px", // Same padding structure for consistency
+    padding: "16px 24px",
   };
 
-  // Removed px-4 py-4 since we're using inline padding now
   const navItemClass =
     "flex items-center gap-4 text-sm font-medium w-full transition-all duration-150";
 
@@ -125,23 +124,84 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               paddingLeft: "16px",
-              marginBottom: "16px", // 2. INCREASED SPACE BELOW LABEL (was 8px)
+              marginBottom: "16px",
             }}
           >
             Menu
           </p>
 
           {/* Menu items */}
-          {/* 3. INCREASED GAP: Changed gap from 4px to 16px, and bottom margin to 40px */}
           <nav style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "40px" }}>
             {NAV_ITEMS.map((item) => {
               const Icon = ICON_MAP[item.icon];
               const isActive = pathname === item.href;
               const isExpanded = openMenus.includes(item.label);
+              const hasChildren = item.hasChildren && item.children && item.children.length > 0;
 
               return (
                 <div key={item.label}>
-                  {item.hasChildren ? (
+                  {hasChildren ? (
+                    <>
+                      <button
+                        onClick={() => toggleMenu(item.label)}
+                        className={navItemClass}
+                        style={isActive ? activeStyle : inactiveStyle}
+                        onMouseEnter={(e) => {
+                          if (!isActive)
+                            e.currentTarget.style.backgroundColor = "#F5F6FA";
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isActive)
+                            e.currentTarget.style.backgroundColor = "transparent";
+                        }}
+                      >
+                        <div className="flex items-center gap-4 flex-1">
+                          {Icon && <Icon size={20} strokeWidth={1.7} />}
+                          <span>{item.label}</span>
+                        </div>
+                        <ChevronDown
+                          size={16}
+                          strokeWidth={1.7}
+                          style={{
+                            transform: isExpanded ? "rotate(180deg)" : "rotate(0deg)",
+                            transition: "transform 0.2s",
+                          }}
+                        />
+                      </button>
+                      {isExpanded && (
+                        <div style={{ marginLeft: "40px", marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                          {item.children!.map((child) => {
+                            const isChildActive = pathname === child.href;
+                            return (
+                              <Link
+                                key={child.label}
+                                href={child.href}
+                                style={{
+                                  padding: "8px 16px",
+                                  borderRadius: "8px",
+                                  fontSize: "14px",
+                                  fontWeight: 500,
+                                  backgroundColor: isChildActive ? "#F5F6FA" : "transparent",
+                                  color: "#190044",
+                                  borderLeft: isChildActive ? "3px solid #E8345A" : "3px solid transparent",
+                                  paddingLeft: "13px",
+                                  transition: "all 0.15s",
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (!isChildActive) e.currentTarget.style.backgroundColor = "#FAFAFA";
+                                }}
+                                onMouseLeave={(e) => {
+                                  if (!isChildActive) e.currentTarget.style.backgroundColor = "transparent";
+                                }}
+                              >
+                                {child.label}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </>
+                  ) : item.hasChildren ? (
                     <button
                       onClick={() => toggleMenu(item.label)}
                       className={navItemClass}
@@ -200,14 +260,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
               letterSpacing: "0.08em",
               textTransform: "uppercase",
               paddingLeft: "16px",
-              marginBottom: "16px", // 4. INCREASED SPACE BELOW LABEL (was 8px)
+              marginBottom: "16px",
             }}
           >
             System
           </p>
 
           {/* System items */}
-          {/* 5. INCREASED GAP: Changed gap from 4px to 16px */}
           <nav style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
             {SYSTEM_ITEMS.map((item) => {
               const Icon = ICON_MAP[item.icon];

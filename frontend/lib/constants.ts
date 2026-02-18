@@ -36,8 +36,26 @@ export const NAV_ITEMS: NavItem[] = [
       { label: "Manage Plan", href: "/plans/manage" },
     ]
   },
-  { label: "Stores", href: "/stores", icon: "Store", hasChildren: true },
-  { label: "Pages", href: "/pages", icon: "FileText", hasChildren: true },
+  { 
+    label: "Stores", 
+    href: "/stores", 
+    icon: "Store", 
+    hasChildren: true,
+    children: [
+      { label: "Add Store", href: "/stores/add" },
+      { label: "Manage Store", href: "/stores/manage" },
+    ]
+  },
+  { 
+    label: "Pages", 
+    href: "/pages", 
+    icon: "FileText", 
+    hasChildren: true,
+    children: [
+      { label: "Add Page", href: "/pages/add" },
+      { label: "Manage Page", href: "/pages/manage" },
+    ]
+  },
   { label: "Media", href: "/media", icon: "Image" },
   { label: "Users", href: "/users", icon: "Users" },
   { label: "Support", href: "/support", icon: "HeadphonesIcon", hasChildren: true },

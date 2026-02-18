@@ -59,6 +59,17 @@ export const NAV_ITEMS: NavItem[] = [
   { label: "Media", href: "/media", icon: "Image" },
   { label: "Users", href: "/users", icon: "Users" },
   { label: "Support", href: "/support", icon: "HeadphonesIcon", hasChildren: true },
+
+  { 
+  label: "Support", 
+  href: "/support", 
+  icon: "HeadphonesIcon", 
+  hasChildren: true,
+  children: [
+    { label: "Support List", href: "/support/list" },
+    { label: "Support Reply", href: "/support/reply" },
+  ]
+},
 ];
 
 export const SYSTEM_ITEMS = [

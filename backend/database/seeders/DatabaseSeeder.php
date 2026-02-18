@@ -3,23 +3,40 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Create a default admin user for testing
+        User::updateOrCreate(
+            ['email' => 'admin@minicart.localhost'],
+            [
+                'name' => 'Jane Austin',
+                'first_name' => 'Jane',
+                'last_name' => 'Austin',
+                'password' => Hash::make('password'),
+                'phone' => '+1234567890',
+                'gender' => 'Female',
+                'country' => 'United States',
+                'state' => 'California',
+                'city' => 'Los Angeles',
+                'address' => '123 Mini Cart Blvd',
+                'post_code' => '90210',
+                'is_admin' => true,
+                'is_verified' => true,
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            PlanSeeder::class,
+            StoreSeeder::class,
         ]);
     }
 }
